@@ -1,0 +1,33 @@
+---
+title: "Project Log"
+author: "Cole Kazu Yanagisawa"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+# Project Log — Returns to Education (Veterans, ACS 2022)
+
+## 2025-10-21 — Project Initialization
+- Created GitHub repo and local project folder
+- Switched from Python to R for econometrics focus
+- Added .Rproj structure and .gitignore
+- Downloaded ACS 2022 veterans-only dataset from IPUMS
+
+## 2025-10-22 — Data Cleaning (01_clean_acs.R)
+- Imported and cleaned ACS data
+- Filtered working-age veterans (18–64) with valid wages
+- Collapsed EDUCD into 5 education categories (<HS, HS, Some/AA, BA, BA+)
+- Created binary "any_disability" variable
+- Exported cleaned dataset (acs_veterans_clean.rds)
+
+## 2025-10-22 — Descriptive Statistics (02_descriptive_stats.R)
+- Summarized mean, median, 10th, 90th percentiles of income
+- Plotted income distributions and average earnings by education
+- Added gender and disability comparisons
+- Exported summary CSVs and figures to /outputs
+
+## 2025-10-22 — Regression Analysis (03_regression.R)
+- Estimated baseline and extended log(earnings) regressions
+- Applied robust SEs (HC1)
+- Exported HTML and TXT tables + predicted earnings plot
+- Next: interpret coefficients and write memo results section
