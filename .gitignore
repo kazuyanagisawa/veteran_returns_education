@@ -1,28 +1,6 @@
-# OS and editor
+.Rhistory
+.RData
+.Rproj.user/
+.Ruserdata
 .DS_Store
-Thumbs.db
-.vscode/
-__pycache__/
-*.pyc
-
-# Python virtual envs
-.env/
-.venv/
-venv/
-env/
-
-# Jupyter
-.ipynb_checkpoints/
-
-# Data and outputs
-data/*
-!data/.gitkeep
-outputs/*
-!outputs/.gitkeep
-
-# Notebooks metadata
-notebooks/.ipynb_checkpoints/
-
-# Logs, caches
-*.log
-.cache/
+outputs/
