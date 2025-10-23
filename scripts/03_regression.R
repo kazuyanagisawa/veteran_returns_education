@@ -35,6 +35,51 @@ glue("Data ready: {nrow(acs_vet)} complete observations after filtering.")
 m1 <- lm(log_wage ~ educ_grp, data = acs_vet)
 summary(m1)
 
+# 3a. Supplementary baseline: education with treatment contrasts (group-to-group)
+# This version provides direct comparisons (e.g., HS vs <HS, BA vs <HS, etc.)
+
+# Temporarily override contrast options to use dummy coding
+options(contrasts = c("contr.treatment", "contr.poly"))
+
+# Refit Model 1 using treatment contrasts for educ_grp
+m1_treat <- lm(log_wage ~ educ_grp, data = acs_vet)
+summary(m1_treat)
+
+# Export side-by-side comparison
+stargazer(m1, m1_treat,
+          type = "text",
+          title = "Comparison of Polynomial vs. Treatment Contrasts (Education Only)",
+          dep.var.labels = "Log(Wage Income)",
+          out = "outputs/regressions/m1_contrast_comparison.txt")
+
+# Reset contrasts to default afterward to avoid affecting later models
+options(contrasts = c("contr.treatment", "contr.poly"))
+
+# 3b. Supplementary baseline (corrected): education with treatment contrasts on unordered factor
+# This creates explicit dummy variables (e.g., HS vs <HS, BA vs <HS)
+
+# Convert ordered factor to unordered to enable dummy contrasts
+acs_vet <- acs_vet %>%
+  mutate(educ_grp_unordered = factor(educ_grp, ordered = FALSE))
+
+# Fit model with treatment contrasts
+m1_treat_corrected <- lm(log_wage ~ educ_grp_unordered, data = acs_vet)
+summary(m1_treat_corrected)
+
+# Export regression summary (text + HTML)
+stargazer(m1_treat_corrected,
+          type = "text",
+          title = "Baseline Model with Treatment Contrasts (Education Dummies)",
+          dep.var.labels = "Log(Wage Income)",
+          out = "outputs/regressions/m1_treatment_summary.txt")
+
+stargazer(m1_treat_corrected,
+          type = "html",
+          title = "Baseline Model with Treatment Contrasts (Education Dummies)",
+          dep.var.labels = "Log(Wage Income)",
+          out = "outputs/regressions/m1_treatment_summary.html")
+
+glue("✅ Treatment contrast model saved to outputs/regressions/")
 
 # 4. Add age and gender controls
 
