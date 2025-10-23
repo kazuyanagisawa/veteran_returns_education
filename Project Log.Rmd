@@ -31,3 +31,40 @@ output: pdf_document
 - Applied robust SEs (HC1)
 - Exported HTML and TXT tables + predicted earnings plot
 - Next: interpret coefficients and write memo results section
+
+## 2025-10-23 — Regression Analysis and Project Milestone
+
+**Summary:**  
+Completed full econometric workflow for “Returns to Education Among U.S. Veterans (ACS 2022).”  
+All scripts (01–03) are finalized, tested, and reproducible.  
+Outputs include cleaned datasets, descriptive summaries, regression tables, and formatted comparison results.
+
+**Work Completed:**
+- Finalized data cleaning (`01_clean_acs.R`):
+  - Filtered veterans aged 18–64 with valid wages.
+  - Created ordered education groups: <HS, HS, Some/AA, BA, Some GS*, MA, GD.
+  - Added `any_disability` binary indicator.
+- Completed descriptive analysis (`02_descriptive_stats.R`):
+  - Summarized earnings by education, gender, and disability.
+  - Exported tables (`summary_by_education.csv`, `summary_gender_disability.csv`).
+  - Generated figures: `fig_earnings_distribution.png`, `fig_earnings_by_education.png`, `fig_gender_edu_boxplot.png`.
+- Completed regression analysis (`03_regression.R`):
+  - Modeled log(earnings) as a function of education, demographics, disability, and worker class.
+  - Applied robust (HC1) standard errors.
+  - Produced outputs: regression tables (TXT, HTML), predicted earnings figure, and formatted model comparison summary (CSV, Markdown, LaTeX).
+
+**Key Results:**
+- Each education step ≈ +118% higher earnings on average.
+- Female veterans ≈ −34% compared to male veterans, holding controls constant.
+- Veterans with disabilities ≈ −26% lower earnings.
+- Class of worker (public/self-employed) ≈ +25% earnings premium.
+- Earnings peak near age 49 (concave age pattern).
+- Model R²: 0.07 → 0.13 → 0.14 as controls added.
+
+**Next Steps:**
+- Draft = memo summarizing results and interpretation.
+- Refine visualizations (optional: confidence intervals or marginal effects).
+- Include formatted tables in memo appendix.
+- Discuss causal interpretation limitations and contextualize results with veteran education research.
+
+✅ *Core analysis phase complete — transitioning to memo writing.*
