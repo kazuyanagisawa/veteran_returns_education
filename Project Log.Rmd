@@ -8,63 +8,87 @@ output: pdf_document
 # Project Log — Returns to Education (Veterans, ACS 2022)
 
 ## 2025-10-21 — Project Initialization
-- Created GitHub repo and local project folder
-- Switched from Python to R for econometrics focus
-- Added .Rproj structure and .gitignore
-- Downloaded ACS 2022 veterans-only dataset from IPUMS
+- Created GitHub repository and initialized local R project.
+- Switched from Python to R to focus on econometric modeling.
+- Added `.Rproj` structure and `.gitignore` for reproducibility.
+- Downloaded 2022 ACS microdata (veterans only) from IPUMS.
 
-## 2025-10-22 — Data Cleaning (01_clean_acs.R)
-- Imported and cleaned ACS data
-- Filtered working-age veterans (18–64) with valid wages
-- Collapsed EDUCD into 5 education categories (<HS, HS, Some/AA, BA, BA+)
-- Created binary "any_disability" variable
-- Exported cleaned dataset (acs_veterans_clean.rds)
+---
 
-## 2025-10-22 — Descriptive Statistics (02_descriptive_stats.R)
-- Summarized mean, median, 10th, 90th percentiles of income
-- Plotted income distributions and average earnings by education
-- Added gender and disability comparisons
-- Exported summary CSVs and figures to /outputs
+## 2025-10-22 — Data Cleaning (`01_clean_acs.R`)
+- Imported ACS data and applied filters for working-age veterans (18–64).
+- Excluded zero or missing wage observations.
+- Collapsed `educd` codes into five education groups: `<HS`, `HS`, `Some/AA`, `BA`, `Some GS*`.
+- Created `any_disability` binary variable based on disability indicators.
+- Cleaned variable names using `janitor::clean_names()`.
+- Exported cleaned dataset as `outputs/acs_veterans_clean.rds`.
 
-## 2025-10-22 — Regression Analysis (03_regression.R)
-- Estimated baseline and extended log(earnings) regressions
-- Applied robust SEs (HC1)
-- Exported HTML and TXT tables + predicted earnings plot
-- Next: interpret coefficients and write memo results section
+---
 
-## 2025-10-23 — Regression Analysis and Project Milestone
+## 2025-10-22 — Descriptive Statistics (`02_descriptive_stats.R`)
+- Computed summary statistics for veterans’ earnings (mean, median, 10th/90th percentiles).
+- Grouped results by education, gender, and disability status.
+- Created and exported summary tables:
+  - `summary_by_education.csv`
+  - `summary_gender_disability.csv`
+- Produced and saved visualizations:
+  - `fig_earnings_distribution.png`
+  - `fig_earnings_by_education.png`
+  - `fig_gender_edu_boxplot.png`
+- Verified consistency between descriptive and regression datasets.
+
+---
+
+## 2025-10-23 — Regression Analysis (`03_regression.R`)
 
 **Summary:**  
-Completed full econometric workflow for “Returns to Education Among U.S. Veterans (ACS 2022).”  
-All scripts (01–03) are finalized, tested, and reproducible.  
-Outputs include cleaned datasets, descriptive summaries, regression tables, and formatted comparison results.
+Completed regression modeling for “Returns to Education Among U.S. Veterans (ACS 2022).”  
+All models were estimated using log-transformed wage income, sequentially adding demographic and occupational controls.  
+Final script implements both polynomial and treatment contrast approaches for education effects.
 
 **Work Completed:**
-- Finalized data cleaning (`01_clean_acs.R`):
-  - Filtered veterans aged 18–64 with valid wages.
-  - Created ordered education groups: <HS, HS, Some/AA, BA, Some GS*, MA, GD.
-  - Added `any_disability` binary indicator.
-- Completed descriptive analysis (`02_descriptive_stats.R`):
-  - Summarized earnings by education, gender, and disability.
-  - Exported tables (`summary_by_education.csv`, `summary_gender_disability.csv`).
-  - Generated figures: `fig_earnings_distribution.png`, `fig_earnings_by_education.png`, `fig_gender_edu_boxplot.png`.
-- Completed regression analysis (`03_regression.R`):
-  - Modeled log(earnings) as a function of education, demographics, disability, and worker class.
-  - Applied robust (HC1) standard errors.
-  - Produced outputs: regression tables (TXT, HTML), predicted earnings figure, and formatted model comparison summary (CSV, Markdown, LaTeX).
+- Baseline model (`m1`): log(wage) ~ education group (orthogonal polynomial contrasts).
+- Supplementary baseline (`m1_treat`, `m1_treat_corrected`):
+  - Estimated treatment contrast models (dummy coding) for group-to-group wage gaps.
+  - Exported comparative output via `stargazer` to `.txt` and `.html` tables.
+- Extended models:
+  - `m2`: Added age, age², and gender controls.
+  - `m3`: Added disability status and class of worker (public/self-employed).
+- Applied robust (HC1) standard errors using `lmtest::coeftest()` and `sandwich::vcovHC()`.
+- Exported all regression outputs:
+  - `returns_to_education.txt`
+  - `returns_to_education.html`
+  - `m1_contrast_comparison.txt`
+  - `m1_treatment_summary.txt`
+  - `model_comparison_summary.csv`
+- Generated predicted earnings visualization:
+  - `fig_predicted_earnings.png`
 
-**Key Results:**
-- Each education step ≈ +118% higher earnings on average.
-- Female veterans ≈ −34% compared to male veterans, holding controls constant.
-- Veterans with disabilities ≈ −26% lower earnings.
-- Class of worker (public/self-employed) ≈ +25% earnings premium.
-- Earnings peak near age 49 (concave age pattern).
-- Model R²: 0.07 → 0.13 → 0.14 as controls added.
+---
 
-**Next Steps:**
-- Draft = memo summarizing results and interpretation.
-- Refine visualizations (optional: confidence intervals or marginal effects).
-- Include formatted tables in memo appendix.
-- Discuss causal interpretation limitations and contextualize results with veteran education research.
+### **Key Findings**
+| Variable / Effect | Interpretation |
+|--------------------|----------------|
+| **Education** | Each additional education step corresponds to roughly **+118% higher earnings** on average (log-linear specification). |
+| **Female (vs Male)** | Female veterans earn approximately **34% less**, holding age, education, and other factors constant. |
+| **Any Disability** | Veterans reporting a disability earn roughly **26% less**, ceteris paribus. |
+| **Class of Worker (Public/Self-Employed)** | Associated with a **+25% wage premium**, compared to private wage/salary workers. |
+| **Age** | Wages rise with age but exhibit a concave relationship, peaking around **age 49**. |
+| **Model Fit (R²)** | Improves from **0.07 → 0.13 → 0.14** across Models 1–3 as covariates are added. |
 
-✅ *Core analysis phase complete — transitioning to memo writing.*
+---
+
+### **Interpretive Note**
+Polynomial and treatment contrast models yield nearly identical fitted wage profiles, confirming a **smooth, monotonic increase** in earnings across education levels among veterans.  
+This suggests that veterans’ returns to education follow a consistent, log-linear pattern without strong nonlinearity.
+
+---
+
+### **Next Steps**
+- Draft the **memo results section**, summarizing regression findings and implications.
+- Integrate selected tables and figures into the memo appendix.
+- Optionally refine visualizations (e.g., add confidence intervals or marginal effects).
+- Discuss **limitations** (cross-sectional data, omitted variables, and selection effects).
+- Contextualize findings with existing literature on **veteran labor market outcomes**.
+
+✅ *Core quantitative analysis complete — transitioning to interpretation and reporting.*

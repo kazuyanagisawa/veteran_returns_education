@@ -159,6 +159,7 @@ ggplot(pred_means, aes(x = educ_grp, y = pred_wage, fill = educ_grp)) +
   theme_minimal()
 ggsave("outputs/regressions/fig_predicted_earnings.png", width = 7, height = 4)
 
+
 # 9. Comparison table: key coefficients and model fit
 
 model_summary <- tibble(
