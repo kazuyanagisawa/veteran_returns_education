@@ -113,3 +113,21 @@ ggplot(pred_means, aes(x = educ_grp, y = pred_wage, fill = educ_grp)) +
   ) +
   theme_minimal()
 ggsave("outputs/regressions/fig_predicted_earnings.png", width = 7, height = 4)
+
+# 9. Comparison table: key coefficients and model fit
+
+model_summary <- tibble(
+  Model = c("Model 1: Education only",
+            "Model 2: + Age & Gender",
+            "Model 3: + Disability & Class of Worker"),
+  Education_Linear = c(coef(m1)["educ_grp.L"], coef(m2)["educ_grp.L"], coef(m3)["educ_grp.L"]),
+  Female = c(NA, coef(m2)["sex_female"], coef(m3)["sex_female"]),
+  Disability = c(NA, NA, coef(m3)["any_disability"]),
+  Class_Worker = c(NA, NA, coef(m3)["classwkr"]),
+  R2 = c(summary(m1)$r.squared, summary(m2)$r.squared, summary(m3)$r.squared)
+) %>%
+  mutate(across(where(is.numeric), \(x) round(x, 3)))
+
+print(model_summary)
+
+write_csv(model_summary, "outputs/regressions/model_comparison_summary.csv")
