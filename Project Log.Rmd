@@ -84,11 +84,26 @@ This suggests that veterans’ returns to education follow a consistent, log-lin
 
 ---
 
-### **Next Steps**
-- Draft the **memo results section**, summarizing regression findings and implications.
-- Integrate selected tables and figures into the memo appendix.
-- Optionally refine visualizations (e.g., add confidence intervals or marginal effects).
-- Discuss **limitations** (cross-sectional data, omitted variables, and selection effects).
-- Contextualize findings with existing literature on **veteran labor market outcomes**.
+## 2025-10-24 — Extended Regression Analysis (Race, Ethnicity & Robustness)
 
-✅ *Core quantitative analysis complete — transitioning to interpretation and reporting.*
+**Summary:**  
+Expanded the regression framework to include race and ethnicity controls and tested robustness by gender and disability subgroups. This completes the analytical phase of the “Returns to Education Among U.S. Veterans (ACS 2022)” project, providing a full picture of how demographic and health characteristics interact with education in determining earnings.
+
+**Work Completed:**
+- Added `race_factor` and `hispanic_factor` categorical variables to regression models.  
+- Estimated Model 4 (race/ethnicity controls), improving model fit from **R² = 0.143 → 0.149**.  
+- Calculated education milestone fractions: **2.3 %** of veterans have less than high school, **35.4 %** have college +.  
+- Conducted robustness regressions by subgroup:  
+  - **Gender split:** Male vs. Female.  
+  - **Disability split:** With vs. Without Disability.  
+- Exported new outputs:  
+  - `returns_to_education_race.txt`  
+  - `education_fractions.csv`  
+  - `robustness_gender_disability.txt`
+
+**Key Findings:**
+- Education remains a strong positive predictor of earnings across all groups.  
+- **Men and non-disabled veterans** show the highest returns to education and best model fit.  
+- **Female veterans** display similar returns but with greater variance and a larger public/self-employment premium.  
+- **Disabled veterans** earn less overall, with weaker education returns (R² = 0.094).  
+- **Racial and ethnic wage gaps** persist even after controlling for education, age, and class of work.  
