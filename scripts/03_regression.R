@@ -76,6 +76,56 @@ summary(m2)
 m3 <- lm(log_wage ~ educ_grp + age + age_sq + sex_female + any_disability + classwkr, data = acs_vet)
 summary(m3)
 
+# 5b. Add race and ethnicity controls (using lowercase variable names from clean_names)
+
+acs_vet <- acs_vet %>%
+  mutate(
+    race_factor = factor(race,
+                         levels = c(1, 2, 3, 4, 5, 6, 7, 8, 9),
+                         labels = c("White", "Black", "AIAN", "Chinese", "Japanese",
+                                    "Other Asian/Pacific", "Other", "Two Races", "Three+ Races")),
+    hispanic_factor = factor(hispan,
+                             levels = c(0, 1, 2, 3, 4, 9),
+                             labels = c("Not Hispanic", "Mexican", "Puerto Rican",
+                                        "Cuban", "Other Hispanic", "Not Reported"))
+  )
+
+# Drop "Not Reported" category to avoid NA contrasts
+acs_vet <- acs_vet %>%
+  filter(hispanic_factor != "Not Reported")
+
+# Model 4: Include race and ethnicity controls
+m4 <- lm(log_wage ~ educ_grp + age + age_sq + sex_female +
+           any_disability + classwkr + race_factor + hispanic_factor,
+         data = acs_vet)
+
+summary(m4)
+
+# Export robust SE version
+stargazer(m3, m4,
+          type = "text",
+          se = list(
+            sqrt(diag(vcovHC(m3, type = "HC1"))),
+            sqrt(diag(vcovHC(m4, type = "HC1")))
+          ),
+          title = "Returns to Education with Race/Ethnicity Controls (Veterans, ACS 2022)",
+          dep.var.labels = "Log(Wage Income)",
+          covariate.labels = c(
+            "Education: High School", "Education: Some College / AA",
+            "Education: Bachelor's", "Education: Master's",
+            "Education: Graduate+",
+            "Age", "Age Squared", "Female",
+            "Any Disability", "Class of Worker (Public/Self)",
+            "Race: Black", "Race: AIAN", "Race: Chinese",
+            "Race: Japanese", "Race: Other Asian/Pacific",
+            "Race: Other", "Race: Two Races", "Race: Three+ Races",
+            "Hispanic: Mexican", "Hispanic: Puerto Rican",
+            "Hispanic: Cuban", "Hispanic: Other Hispanic"
+          ),
+          omit.stat = c("f", "ser"),
+          out = "outputs/regressions/returns_to_education_race.txt"
+)
+
 # 6. Robust standard errors (HC1)
 robust_se_m1 <- coeftest(m1, vcov = vcovHC(m1, type = "HC1"))
 robust_se_m2 <- coeftest(m2, vcov = vcovHC(m2, type = "HC1"))
@@ -166,3 +216,51 @@ model_summary <- tibble(
 
 print(model_summary)
 write_csv(model_summary, "outputs/regressions/model_comparison_summary.csv")
+
+# 10. Education Milestones: No HS vs. College+
+
+edu_fractions <- acs_vet %>%
+  summarise(
+    total = n(),
+    no_hs = sum(educ_grp == "<HS", na.rm = TRUE),
+    college_plus = sum(educ_grp %in% c("BA", "MA", "GD"), na.rm = TRUE)
+  ) %>%
+  mutate(
+    frac_no_hs = round(no_hs / total * 100, 1),
+    frac_college_plus = round(college_plus / total * 100, 1)
+  )
+
+print(edu_fractions)
+
+write_csv(edu_fractions, "outputs/regressions/education_fractions.csv")
+
+glue("🎓 {edu_fractions$frac_no_hs}% of veterans have less than HS; {edu_fractions$frac_college_plus}% have college+.")
+
+# 11. Robustness Checks — Separate Regressions by Gender and Disability
+
+# a) Split by gender
+m4_male <- lm(log_wage ~ educ_grp + age + age_sq + any_disability + classwkr +
+                race_factor + hispanic_factor,
+              data = acs_vet %>% filter(sex_female == 0))
+
+m4_female <- lm(log_wage ~ educ_grp + age + age_sq + any_disability + classwkr +
+                  race_factor + hispanic_factor,
+                data = acs_vet %>% filter(sex_female == 1))
+
+# b) Split by disability status
+m4_nondis <- lm(log_wage ~ educ_grp + age + age_sq + sex_female + classwkr +
+                  race_factor + hispanic_factor,
+                data = acs_vet %>% filter(any_disability == 0))
+
+m4_disab <- lm(log_wage ~ educ_grp + age + age_sq + sex_female + classwkr +
+                 race_factor + hispanic_factor,
+               data = acs_vet %>% filter(any_disability == 1))
+
+# Export all robustness regressions together
+stargazer(m4_male, m4_female, m4_nondis, m4_disab,
+          type = "text",
+          title = "Robustness: Returns to Education by Gender and Disability",
+          dep.var.labels = "Log(Wage Income)",
+          column.labels = c("Male", "Female", "No Disability", "With Disability"),
+          omit.stat = c("f", "ser"),
+          out = "outputs/regressions/robustness_gender_disability.txt")
