@@ -3,8 +3,8 @@
 *Econometrics project analyzing the relationship between education and labor-market earnings among U.S. military veterans using 2022 ACS microdata.*
 
 **Author:** Cole Kazu Yanagisawa  
-**Goal:** Estimate the “returns to education” for working-age veterans and identify how age, gender, disability, and race contribute to wage variation.  
-**Stack:** R, tidyverse, broom, lmtest, sandwich, stargazer, janitor, glue, scales
+**Goal:** Estimate the “returns to education” for working-age veterans and identify how age, gender, disability, and race contribute to wage variation.
+**Stack:** R, tidyverse, broom, lmtest, sandwich, stargazer, janitor, glue, scales, readr, ggplot2, webshot2
 
 ---
 
@@ -73,6 +73,8 @@ veteran_returns_education/
 │
 ├── Project Log.Rmd
 ├── Project-Log.pdf
+├── setup.R
+├── reuirements.txt
 └── README.md
 ```
 
@@ -118,6 +120,7 @@ However, education remains the single strongest predictor throughout all specifi
 - **Heteroskedasticity:** Addressed via robust (White/HC1) standard errors using `sandwich`.  
 - **Robustness Checks:** Separate regressions by gender and disability groups confirm consistent returns to education across subpopulations.  
 - **Visualization:** Predicted earnings charts labeled by education level and grouped by demographics for interpretability.
+- **Export Tools:** All tables generated with stargazer; HTML-to-PNG conversions automated via webshot2.
 
 ---
 
@@ -126,9 +129,9 @@ However, education remains the single strongest predictor throughout all specifi
 1. **Install required packages:**
    ```r
    install.packages(c(
-     "tidyverse","broom","janitor","glue","scales",
-     "lmtest","sandwich","stargazer"
-   ))
+  "tidyverse","broom","janitor","glue","scales",
+  "lmtest","sandwich","stargazer","readr","ggplot2","webshot2"
+))
    ```
 2. **Run scripts in order: **
    - `scripts/01_data_cleaning.R`  
