@@ -1,0 +1,23 @@
+# Core data wrangling and analysis
+tidyverse
+readr
+dplyr
+broom
+janitor
+glue
+scales
+
+# Statistical modeling and inference
+lmtest
+sandwich
+stargazer
+
+# Visualization
+ggplot2
+
+# Export and automation
+webshot2
+
+# For HTML/PDF rendering
+knitr
+rmarkdown

@@ -35,36 +35,45 @@ This analysis examines how educational attainment influences earnings among **U.
 ## Repo Structure
 
 ```
-├── .RData              # R workspace image
-├── .RHistory          # R command history
-├── data/ 
-│   └── acs_2022_vet.csv # Cleaned ACS 2022 veteran microdata
+veteran_returns_education/
+├── .gitignore
+├── .RData
+├── .Rhistory
 ├── LICENSE
+├── veteran_returns_education.Rproj
+│
+├── data/
+│   └── acs_2022_vet.csv
+│
 ├── outputs/
 │   ├── acs_veterans_clean.rds
 │   ├── education_distribution.csv
-│   ├── fig_earnings_by_agegroup.png
+│   ├── fig_education_distribution.png
 │   ├── fig_earnings_by_education.png
-│   ├── fig_education_distribution.png
 │   ├── fig_earnings_distribution.png
-│   ├── fig_education_distribution.png
+│   ├── fig_earnings_by_agegroup.png
 │   ├── fig_gender_edu_boxplot.png
-│   ├── regressions/
-│   │   ├── returns_to_education.html
-│   │   ├── m1_treatment_summary.html
-│   │   ├── model_comparison_summary.csv
-│   │   └── fig_predicted_earnings.png
 │   ├── summary_age_split.csv
 │   ├── summary_by_education.csv
-│   └──summary_gender_disability.csv 
-|── Project_Log.Rmd
-├── Project-Log.pdf
-├── README.md
+│   ├── summary_gender_disability.csv
+│   │
+│   └── regressions/
+│       ├── education_fractions.csv
+│       ├── fig_predicted_disability_gap.png
+│       ├── fig_predicted_earnings.png
+│       ├── model_comparison_summary.csv
+│       ├── returns_to_education_full.html
+│       ├── returns_to_education_full.png
+│       └── returns_to_education_full.txt
+│
 ├── scripts/
 │   ├── 01_data_cleaning.R
 │   ├── 02_descriptive_analysis.R
 │   └── 03_regression_analysis.R
-└── veteran_returns_education.Rproj
+│
+├── Project Log.Rmd
+├── Project-Log.pdf
+└── README.md
 ```
 
 - Scripts numbered sequentially for workflow clarity.
