@@ -7,6 +7,9 @@ library(lmtest)
 library(sandwich)
 library(stargazer)
 library(glue)
+library(dplyr)
+library(ggplot2)
+library(scales)
 
 # 1. Load cleaned dataset
 acs_vet <- read_rds("outputs/acs_veterans_clean.rds")
@@ -102,9 +105,6 @@ m4 <- lm(log_wage ~ educ_grp + age + age_sq + sex_female +
 summary(m4)
 
 # 📊 Predicted (adjusted) earnings by disability status from Model 4
-library(dplyr)
-library(ggplot2)
-library(scales)
 
 newdata <- acs_vet %>%
   summarise(
