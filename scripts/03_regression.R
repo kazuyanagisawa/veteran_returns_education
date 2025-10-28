@@ -101,76 +101,103 @@ m4 <- lm(log_wage ~ educ_grp + age + age_sq + sex_female +
 
 summary(m4)
 
-# Export robust SE version
-stargazer(m3, m4,
-          type = "text",
-          se = list(
-            sqrt(diag(vcovHC(m3, type = "HC1"))),
-            sqrt(diag(vcovHC(m4, type = "HC1")))
-          ),
-          title = "Returns to Education with Race/Ethnicity Controls (Veterans, ACS 2022)",
+# 📊 Predicted (adjusted) earnings by disability status from Model 4
+library(dplyr)
+library(ggplot2)
+library(scales)
+
+newdata <- acs_vet %>%
+  summarise(
+    age = mean(age, na.rm = TRUE),
+    age_sq = mean(age_sq, na.rm = TRUE),
+    sex_female = mean(sex_female, na.rm = TRUE),
+    classwkr = mean(classwkr, na.rm = TRUE)
+  ) %>%
+  slice(rep(1, 2)) %>%
+  mutate(any_disability = c(0, 1))
+
+newdata$educ_grp <- factor("BA", levels = levels(acs_vet$educ_grp))
+newdata$race_factor <- factor("White", levels = levels(acs_vet$race_factor))
+newdata$hispanic_factor <- factor("Not Hispanic", levels = levels(acs_vet$hispanic_factor))
+
+newdata$pred_log_wage <- predict(m4, newdata = newdata)
+newdata$pred_wage <- exp(newdata$pred_log_wage)
+newdata$label <- c("No Disability", "With Disability")
+
+ggplot(newdata, aes(x = label, y = pred_wage, fill = label)) +
+  geom_col(show.legend = FALSE) +
+  geom_text(aes(label = dollar(round(pred_wage, 0))),
+            vjust = -0.5, fontface = "bold", size = 4) +
+  scale_y_continuous(labels = label_dollar()) +
+  labs(
+    title = "Adjusted Predicted Earnings by Disability Status (Model 4)",
+    x = NULL, y = "Predicted Annual Earnings ($)"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(axis.text.x = element_text(face = "bold"))
+
+ggsave("outputs/regressions/fig_predicted_disability_gap.png", width = 7, height = 6)
+
+# --- Export regression results (Models 1–4) with aligned labels ---
+
+# Compute robust SEs
+robust_m1 <- sqrt(diag(vcovHC(m1, type = "HC1")))
+robust_m2 <- sqrt(diag(vcovHC(m2, type = "HC1")))
+robust_m3 <- sqrt(diag(vcovHC(m3, type = "HC1")))
+robust_m4 <- sqrt(diag(vcovHC(m4, type = "HC1")))
+
+# Export both text + HTML with compact, aligned column headers
+stargazer(m1, m2, m3, m4,
+          type = "html",
+          se = list(robust_m1, robust_m2, robust_m3, robust_m4),
+          title = "Returns to Education Among U.S. Veterans (ACS 2022)",
           dep.var.labels = "Log(Wage Income)",
+          column.labels = c("Model&nbsp;1:<br>Edu&nbsp;Only",
+                            "Model&nbsp;2:<br>+&nbsp;Age&nbsp;&Gender",
+                            "Model&nbsp;3:<br>+&nbsp;Disability&nbsp;&Class",
+                            "Model&nbsp;4:<br>+&nbsp;Race&nbsp;&Ethnicity"),
           covariate.labels = c(
             "Education: High School", "Education: Some College / AA",
-            "Education: Bachelor's", "Education: Master's",
-            "Education: Graduate+",
+            "Education: Bachelor's", "Education: Master's", "Education: Graduate+",
             "Age", "Age Squared", "Female",
             "Any Disability", "Class of Worker (Public/Self)",
-            "Race: Black", "Race: AIAN", "Race: Chinese",
-            "Race: Japanese", "Race: Other Asian/Pacific",
-            "Race: Other", "Race: Two Races", "Race: Three+ Races",
+            "Race: Black", "Race: AIAN", "Race: Chinese", "Race: Japanese",
+            "Race: Other Asian/Pacific", "Race: Other",
+            "Race: Two Races", "Race: Three+ Races",
             "Hispanic: Mexican", "Hispanic: Puerto Rican",
             "Hispanic: Cuban", "Hispanic: Other Hispanic"
           ),
           omit.stat = c("f", "ser"),
-          out = "outputs/regressions/returns_to_education_race.txt"
+          out = "outputs/regressions/returns_to_education_full.html"
 )
 
-# 6. Robust standard errors (HC1)
-robust_se_m1 <- coeftest(m1, vcov = vcovHC(m1, type = "HC1"))
-robust_se_m2 <- coeftest(m2, vcov = vcovHC(m2, type = "HC1"))
-robust_se_m3 <- coeftest(m3, vcov = vcovHC(m3, type = "HC1"))
-
-# 7. Export regression tables
-dir.create("outputs/regressions", showWarnings = FALSE)
-
-stargazer(m1, m2, m3,
+stargazer(m1, m2, m3, m4,
           type = "text",
-          se = list(
-            sqrt(diag(vcovHC(m1, type = "HC1"))),
-            sqrt(diag(vcovHC(m2, type = "HC1"))),
-            sqrt(diag(vcovHC(m3, type = "HC1")))
-          ),
+          se = list(robust_m1, robust_m2, robust_m3, robust_m4),
           title = "Returns to Education Among U.S. Veterans (ACS 2022)",
           dep.var.labels = "Log(Wage Income)",
+          column.labels = c("Model 1: Edu Only",
+                            "Model 2: + Age & Gender",
+                            "Model 3: + Disability & Class",
+                            "Model 4: + Race & Ethnicity"),
           covariate.labels = c(
             "Education: High School", "Education: Some College / AA",
             "Education: Bachelor's", "Education: Master's", "Education: Graduate+",
-            "Age", "Age Squared", "Female", "Any Disability", "Class of Worker (Public/Self)"
+            "Age", "Age Squared", "Female",
+            "Any Disability", "Class of Worker (Public/Self)",
+            "Race: Black", "Race: AIAN", "Race: Chinese", "Race: Japanese",
+            "Race: Other Asian/Pacific", "Race: Other",
+            "Race: Two Races", "Race: Three+ Races",
+            "Hispanic: Mexican", "Hispanic: Puerto Rican",
+            "Hispanic: Cuban", "Hispanic: Other Hispanic"
           ),
           omit.stat = c("f", "ser"),
-          out = "outputs/regressions/returns_to_education.txt"
+          out = "outputs/regressions/returns_to_education_full.txt"
 )
 
-stargazer(m1, m2, m3,
-          type = "html",
-          se = list(
-            sqrt(diag(vcovHC(m1, type = "HC1"))),
-            sqrt(diag(vcovHC(m2, type = "HC1"))),
-            sqrt(diag(vcovHC(m3, type = "HC1")))
-          ),
-          title = "Returns to Education Among U.S. Veterans (ACS 2022)",
-          dep.var.labels = "Log(Wage Income)",
-          covariate.labels = c(
-            "Education: High School", "Education: Some College / AA",
-            "Education: Bachelor's", "Education: Master's", "Education: Graduate+",
-            "Age", "Age Squared", "Female", "Any Disability", "Class of Worker (Public/Self)"
-          ),
-          omit.stat = c("f", "ser"),
-          out = "outputs/regressions/returns_to_education.html"
-)
+glue("✅ Regression tables (Models 1–4) exported to outputs/regressions/")
 
-glue("✅ Regression tables exported to outputs/regressions/")
+ggsave("outputs/regressions/fig_predicted_disability_gap.png", width = 7, height = 6)
 
 # 8. Visualize predicted earnings by education
 pred_means <- acs_vet %>%
