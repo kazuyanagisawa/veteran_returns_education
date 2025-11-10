@@ -1,0 +1,4 @@
+Model,Education_Linear,Female,Disability,Class_Worker,R2
+Model 1: Education only,1.032,NA,NA,NA,0.074
+Model 2: + Age & Gender,1.016,-0.416,NA,NA,0.131
+Model 3: + Disability & Class of Worker,1.012,-0.422,-0.302,0.236,0.143
