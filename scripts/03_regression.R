@@ -69,7 +69,7 @@ stargazer(m1_treat_corrected,
           dep.var.labels = "Log(Wage Income)",
           out = "outputs/regressions/m1_treatment_summary.html")
 
-glue("✅ Treatment contrast model saved to outputs/regressions/")
+glue("Treatment contrast model saved to outputs/regressions/")
 
 # 4. Add age and gender controls
 m2 <- lm(log_wage ~ educ_grp + age + age_sq + sex_female, data = acs_vet)

@@ -25,7 +25,7 @@ acs_vet <- acs %>%
 glue("Subset to {nrow(acs_vet)} veterans aged 18–64 with valid earnings.")
 
 
-# 3. Create education categories (using EDUCD detailed codes)
+# 3. Create education categories w/ EDUCD detailed codes
 
 acs_vet <- acs_vet %>%
   mutate(

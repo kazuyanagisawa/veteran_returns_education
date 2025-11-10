@@ -148,4 +148,4 @@ ggplot(acs_vet %>% mutate(sex = if_else(sex == 1, "Male", "Female")),
 ggsave("outputs/fig_gender_edu_boxplot.png", width = 8, height = 5)
 
 # 7. Completion message
-glue("✅ Summary tables and figures saved to /outputs/")
+glue("Summary tables and figures saved to /outputs/")

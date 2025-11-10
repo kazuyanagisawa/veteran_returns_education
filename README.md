@@ -133,10 +133,12 @@ However, education remains the single strongest predictor throughout all specifi
   "lmtest","sandwich","stargazer","readr","ggplot2","webshot2"
 ))
    ```
+   
 2. **Run scripts in order: **
    - `scripts/01_data_cleaning.R`  
    - `scripts/02_descriptive_analysis.R`  
    - `scripts/03_regression_analysis.R`
+   
 3. **View outputs in `/outputs/` folder.**
   All cleaned data, regression summaries, and figures will appear under the /outputs/ directory.
   
