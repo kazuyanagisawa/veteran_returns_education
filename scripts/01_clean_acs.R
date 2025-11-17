@@ -3,6 +3,10 @@ library(tidyverse)
 library(janitor)
 library(glue)
 
+# reproducibility options 
+
+options(dplyr.summarise.inform = FALSE)
+set.seed(133)
 
 # 1. Load & inspect
 
@@ -50,7 +54,7 @@ acs_vet <- acs_vet %>%
   mutate(
     educ_grp = factor(
       educ_grp,
-      levels = c("<HS", "HS", "Some/AA", "BA", "Some GS*", "MA", "GD"),
+      levels = c("<HS", "HS", "Some/AA", "BA", "MA", "GD"),
       ordered = TRUE
     )
   )
