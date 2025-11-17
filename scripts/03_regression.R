@@ -11,6 +11,10 @@ library(dplyr)
 library(ggplot2)
 library(scales)
 
+#reproducibility options
+options(dplyr.summarise.inform = FALSE)
+set.seed(133)
+
 # 1. Load cleaned dataset
 acs_vet <- read_rds("outputs/acs_veterans_clean.rds")
 glue("Loaded {nrow(acs_vet)} rows for regression analysis.")
@@ -20,56 +24,23 @@ edu_levels <- c("<HS", "HS", "Some/AA", "BA", "MA", "GD")
 
 acs_vet <- acs_vet %>%
   mutate(
-    educ_grp = fct_drop(factor(educ_grp, levels = edu_levels, ordered = TRUE)),
+    # Treat education as a NOMINAL factor (not ordered)
+    educ_grp = factor(educ_grp, levels = edu_levels, ordered = FALSE),
+    educ_grp = fct_drop(educ_grp),  # drop unused levels
+    educ_grp = relevel(educ_grp, ref = "<HS"),  # ensure <HS is reference
     log_wage = log(incwage),
     sex_female = if_else(sex == 2, 1, 0),
     age_sq = age^2
   ) %>%
   drop_na(log_wage, educ_grp, age, sex_female)
 
-glue("Data ready: {nrow(acs_vet)} complete observations after filtering.")
+glue("Data ready: {nrow(acs_vet)} complete observations after filtering. Reference group: {levels(acs_vet$educ_grp)[1]}")
+
 
 # 3. Baseline regression: log(earnings) ~ education
 m1 <- lm(log_wage ~ educ_grp, data = acs_vet)
 summary(m1)
 
-# 3a. Supplementary baseline: treatment contrasts (group-to-group)
-# Provides direct comparisons (e.g., HS vs <HS, BA vs <HS, etc.)
-options(contrasts = c("contr.treatment", "contr.poly"))
-
-m1_treat <- lm(log_wage ~ educ_grp, data = acs_vet)
-summary(m1_treat)
-
-# Export side-by-side comparison
-stargazer(m1, m1_treat,
-          type = "text",
-          title = "Comparison of Polynomial vs. Treatment Contrasts (Education Only)",
-          dep.var.labels = "Log(Wage Income)",
-          out = "outputs/regressions/m1_contrast_comparison.txt")
-
-# Reset contrasts
-options(contrasts = c("contr.treatment", "contr.poly"))
-
-# 3b. Unordered factor version (explicit dummies)
-acs_vet <- acs_vet %>%
-  mutate(educ_grp_unordered = factor(educ_grp, ordered = FALSE))
-
-m1_treat_corrected <- lm(log_wage ~ educ_grp_unordered, data = acs_vet)
-summary(m1_treat_corrected)
-
-stargazer(m1_treat_corrected,
-          type = "text",
-          title = "Baseline Model with Treatment Contrasts (Education Dummies)",
-          dep.var.labels = "Log(Wage Income)",
-          out = "outputs/regressions/m1_treatment_summary.txt")
-
-stargazer(m1_treat_corrected,
-          type = "html",
-          title = "Baseline Model with Treatment Contrasts (Education Dummies)",
-          dep.var.labels = "Log(Wage Income)",
-          out = "outputs/regressions/m1_treatment_summary.html")
-
-glue("Treatment contrast model saved to outputs/regressions/")
 
 # 4. Add age and gender controls
 m2 <- lm(log_wage ~ educ_grp + age + age_sq + sex_female, data = acs_vet)
@@ -85,7 +56,7 @@ acs_vet <- acs_vet %>%
   mutate(
     race_factor = factor(race,
                          levels = c(1, 2, 3, 4, 5, 6, 7, 8, 9),
-                         labels = c("White", "Black", "AIAN", "Chinese", "Japanese",
+                         labels = c("White", "Black", "American Indian / Alaska Native", "Chinese", "Japanese",
                                     "Other Asian/Pacific", "Other", "Two Races", "Three+ Races")),
     hispanic_factor = factor(hispan,
                              levels = c(0, 1, 2, 3, 4, 9),
@@ -162,12 +133,12 @@ stargazer(m1, m2, m3, m4,
                             "+ Disability & Class",
                             "+ Race & Ethnicity"),
           keep = c("educ_grp", "sex_female", "any_disability", "classwkr",
-                   "race_factorBlack", "race_factorAIAN", "hispanic_factorMexican"),
+                   "race_factorBlack", "race_factorAmerican Indian / Alaska Native", "hispanic_factorMexican"),
           covariate.labels = c(
             "Education: High School", "Education: Some College / AA",
             "Education: Bachelor's", "Education: Master's", "Education: Graduate+",
             "Female", "Any Disability", "Class of Worker (Public/Self)",
-            "Race: Black", "Race: AIAN", "Hispanic: Mexican"
+            "Race: Black", "Race: American Indian / Alaska Native", "Hispanic: Mexican"
           ),
           omit.stat = c("f", "ser"),
           digits = 3,
@@ -213,17 +184,15 @@ ggsave("outputs/regressions/fig_predicted_earnings.png", width = 8, height = 5)
 model_summary <- tibble(
   Model = c("Model 1: Education only",
             "Model 2: + Age & Gender",
-            "Model 3: + Disability & Class of Worker"),
-  Education_Linear = c(coef(m1)["educ_grp.L"], coef(m2)["educ_grp.L"], coef(m3)["educ_grp.L"]),
-  Female = c(NA, coef(m2)["sex_female"], coef(m3)["sex_female"]),
-  Disability = c(NA, NA, coef(m3)["any_disability"]),
-  Class_Worker = c(NA, NA, coef(m3)["classwkr"]),
-  R2 = c(summary(m1)$r.squared, summary(m2)$r.squared, summary(m3)$r.squared)
-) %>%
-  mutate(across(where(is.numeric), \(x) round(x, 3)))
-
-print(model_summary)
+            "Model 3: + Disability & Class of Worker",
+            "Model 4: + Race & Ethnicity"),
+  Adj_R2 = c(summary(m1)$adj.r.squared,
+             summary(m2)$adj.r.squared,
+             summary(m3)$adj.r.squared,
+             summary(m4)$adj.r.squared)
+)
 write_csv(model_summary, "outputs/regressions/model_comparison_summary.csv")
+print(model_summary)
 
 # 10. Education Milestones: No HS vs. College+
 

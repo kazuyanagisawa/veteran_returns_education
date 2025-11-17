@@ -7,6 +7,10 @@ library(ggplot2)
 library(glue)
 library(scales)
 
+# reproducibility options
+options(dplyr.summarise.inform = FALSE)
+set.seed(133)
+
 # 1. Load cleaned dataset
 acs_vet <- read_rds("outputs/acs_veterans_clean.rds")
 glue("Loaded {nrow(acs_vet)} veteran records")
@@ -41,7 +45,7 @@ edu_summary <- acs_vet %>%
     p90             = quantile(incwage, 0.90, na.rm = TRUE),
     .groups = "drop"
   ) %>%
-  mutate(across(where(is.numeric), \(x) round(x, 0)))
+  mutate(across(where(is.numeric), \(x) round(x, 1)))
 
 write_csv(edu_summary, "outputs/summary_by_education.csv")
 
@@ -62,7 +66,8 @@ ggplot(edu_dist, aes(x = educ_grp, y = share, fill = educ_grp)) +
   labs(
     title = "Education Distribution Among U.S. Veterans (ACS 2022)",
     x = "Education Level",
-    y = "Share of Veterans"
+    y = "Share of Veterans",
+    caption = "Source: 2022 American Community Survey (IPUMS USA)"
   ) +
   theme_minimal(base_size = 13) +
   theme(plot.title = element_text(margin = margin(b = 10)))
